@@ -15,7 +15,17 @@ router.get("/users",/*rolesPermissionFilter(["admin"]),*/ async (req, res) => {
 
     try {
         const result = await client.query(query);
-        res.send(result);
+        const preparedResult = {
+            fields: result.fields.map(field => field.name).filter(field => field!=="password"),
+            rowCount: result.rowCount,
+            rows: result.rows
+        }
+
+        preparedResult.rows.forEach(element => {
+            delete element["password"]
+        });
+
+        res.send(preparedResult);
 
     } catch (error) {
         console.log(error);

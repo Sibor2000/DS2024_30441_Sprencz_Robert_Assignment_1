@@ -14,8 +14,12 @@ router.get("/devices",/*rolesPermissionFilter(["admin"]),*/ async (req, res) => 
     const query = "select * from \"device\""
     try {
         const result = await client.query(query);
-        res.send(result);
-
+        const preparedResult = {
+            fields: result.fields.map(field => field.name),
+            rowCound: result.rowCount,
+            rows: result.rows
+        }
+        res.send(preparedResult);
     } catch (error) {
         console.log(error);
     }
