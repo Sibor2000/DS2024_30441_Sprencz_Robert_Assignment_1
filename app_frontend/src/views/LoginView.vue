@@ -13,14 +13,13 @@
             
             <button type="submit" v-on:click.prevent="login"> Login</button>
 
-            <p> {{ verified }}</p>
+            <p> {{ message }}</p>
     </form>
 </template>
 
 <script>
-import { validatePassword } from '@/utilities/regexes'; 
 import {user_instance} from '@/utilities/request';
-import axios from 'axios';
+import router from '@/router';
 
 export default {
     data(){
@@ -29,30 +28,35 @@ export default {
                 name: "",
                 password: ""
             },
-            verified:""
+            message:""
         }
     },
     methods:{
         async login(){
             if(this.input.name == "" || this.input.password==""){
-                this.verified = "Can not be empty"
+                this.message = "Can not be empty"
                 return
             }
-
-            /*
-            if(!validatePassword(this.input.password)){
-                this.verified = "Incorrect password"
-                return
-            }
-            */
-
-            //this.verified = "OK"
-
-            let res = await user_instance.get('/users')
+            
+            const req_input = this.input
+            await user_instance.post('/login',
+                req_input, 
+                { headers: {
+                    'Content-Type': 'application/json'
+            }})
+            .then(response => {
+                this.message = `login successful\n`
                 
-            console.log(res)
-            this.verified = res.data
+                this.$cookies.set("token",response.data.token)
+
+                setTimeout(()=>{
+                    router.push('/nav')
+                }, 1000)
                 
+            })
+            .catch(error => {
+                this.message = error.response.data.message
+            });
             
         }
     }

@@ -3,6 +3,11 @@ import HomeView from '../views/HomeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import DeviceView from '@/views/tableViews/DeviceView.vue'
 import UserView from '@/views/tableViews/UserView.vue'
+import AddUserView from '@/views/addViews/AddUserView.vue'
+import EditUserView from '@/views/editViews/EditUserView.vue'
+import AddDeviceView from '@/views/addViews/AddDeviceView.vue'
+import EditDeviceView from '@/views/editViews/EditDeviceView.vue'
+import NavigationView from '@/views/NavigationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,16 +17,11 @@ const router = createRouter({
       name: 'home',
       component: HomeView
     },
-    /*
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
-    */
+      path: '/nav',
+      name: 'navigation',
+      component: NavigationView
+    },
    {
     path: '/login',
     name: 'login',
@@ -36,6 +36,26 @@ const router = createRouter({
     path: '/users',
     name: 'users',
     component: UserView
+   },
+   {
+    path: '/user/add',
+    name: 'user_add',
+    component: AddUserView
+   },
+   {
+    path: '/user/edit/:id',
+    name: 'user_edit',
+    component: EditUserView
+   },
+   {
+    path: '/device/add',
+    name: 'device_add',
+    component: AddDeviceView
+   },
+   {
+    path: '/device/edit/:id',
+    name: 'device_edit',
+    component: EditDeviceView
    },
    {
     path: '/:pathMatch(.*)*',

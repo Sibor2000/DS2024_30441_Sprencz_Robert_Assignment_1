@@ -1,5 +1,23 @@
 <template>
-    <CustomTable :data="tableData" :columns="tableColumns"/>
+
+    <RouterLink to="/devices" v-slot=" {navigate}">
+            <button @click="navigate">
+                Devices
+            </button>
+    </RouterLink>
+
+    <RouterLink to="/user/add" v-slot=" {navigate}">
+            <button @click="navigate">
+                Add user
+            </button>
+    </RouterLink>
+
+    
+    <CustomTable 
+    :tableData="tableData" 
+    :tableColumns="tableColumns" 
+    :baseEditLink="editLink" 
+    :baseDeleteLink="deleteLink"/>
 </template>
 
 
@@ -13,28 +31,27 @@ export default {
     },
     data(){
         return{
-            tableColumns: [
-                {label: "Name",field: "name"},
-                {label: "Role",field: "role"},
-            ],
-            tableData: [
-                {name: "George", role: "admin"}
-            ]
+            tableColumns: [],
+            tableData: [],
+            editLink: `/user`,
+            deleteLink: `http://${import.meta.env.VITE_USER_HOST}:${import.meta.env.VITE_USER_PORT}/user`
         }
     },
-    
     created(){
         this.getUsers()
     },
     methods: {
         async getUsers() {
             try {
-                const res = await user_instance.get('/users')
+                const res = await user_instance.get('/users',{ headers: {
+                    'authorization': `Bearer ${this.$cookies.get("token")}`
+                }})
                 this.tableColumns = res.data.fields.map((f)=>({
                     label: f,
                     field: f
                 }));
                 this.tableData = res.data.rows;
+                
                 console.log(res)
             } catch (error) {
                 console.error(error)

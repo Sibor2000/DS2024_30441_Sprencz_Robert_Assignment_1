@@ -1,10 +1,11 @@
 import path from "path";
 import * as url from "url"
+import { jwtVerify } from "jose";
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const permitAdminOrSelf = (req, res, next) => {
-    if (req.session.user_data && (req.session.user_data.role === "admin" || req.session.user_data.user_id == req.params.id)) {
+    if (req.user && (req.user.role === "admin" || req.user.id == req.params.id)) {
         next();
     } else {
         res.send(403).send({ "message": "Permission denied" })
@@ -13,7 +14,7 @@ export const permitAdminOrSelf = (req, res, next) => {
 
 export const rolesPermissionFilter = (roleArray) => {
     return async (req, res, next) => {
-        if (req.session.user_data && roleArray.includes(req.session.user_data.role)) {
+        if (req.user && roleArray.includes(req.user.role)) {
             next();
         } else {
             res.status(403).send({
@@ -22,16 +23,6 @@ export const rolesPermissionFilter = (roleArray) => {
         }
 
     }
-}
-
-export const loggedInFilter = async (req, res, next) => {
-    if (!req.session || !req.session.user_data) {
-        res.status(401).send({
-            "message": "Not logged in"
-        })
-        return;
-    }
-    next();
 }
 
 export const sameAsUserId = (someId) => {
@@ -43,5 +34,26 @@ export const sameAsUserId = (someId) => {
                 "message": "Permission denied"
             })
         }
+    }
+}
+
+export const verifyJWT = async(req,res,next) => {
+    const authHeader = req.headers['authorization']
+
+    if(!authHeader){
+        res.status(401).send({
+            "message":"auth header missing"
+        })
+        return
+    }
+
+    const token = authHeader.split(' ')[1];
+    const mySecret = Buffer.from(process.env.JWT_SECRET, 'utf-8')
+    try{
+        const {payload} = await jwtVerify(token, mySecret)
+        req.user = payload
+        next()
+    }catch(error){
+        return res.status(401).send({"message":"invalid token"})
     }
 }

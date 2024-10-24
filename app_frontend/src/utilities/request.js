@@ -1,10 +1,9 @@
 import axios from "axios";
 
 export const device_instance = axios.create({
-    //baseURL: 'http://'+import.meta.env.USER_HOST+":"+import.meta.env.USER_PORT,
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://'+import.meta.env.VITE_DEVICE_HOST+':'+import.meta.env.VITE_DEVICE_PORT,
 })
 
 export const user_instance = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://'+import.meta.env.VITE_USER_HOST+':'+import.meta.env.VITE_USER_PORT,
 })
