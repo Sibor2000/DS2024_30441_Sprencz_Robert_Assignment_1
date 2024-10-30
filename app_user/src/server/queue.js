@@ -2,7 +2,7 @@ import amqp from "amqplib/callback_api.js"
 import client from "./client.js"
 
 export async function userDeleted(message){
-    amqp.connect("amqp://localhost", function(error0, connection){
+    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/xnfrdwuo`, function(error0, connection){
         if(error0){
             throw error0
         }
@@ -25,7 +25,7 @@ export async function userDeleted(message){
 }
 
 export async function checkForUser(){
-    amqp.connect("amqp://localhost", function(error0, connection){
+    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/xnfrdwuo`, function(error0, connection){
         if(error0){
             throw error0
         }

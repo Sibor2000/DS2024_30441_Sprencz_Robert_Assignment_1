@@ -10,7 +10,7 @@ import { checkForUser } from "./queue.js"
 const router = express.Router()
 export default router
 
-// TODO: might want to check what permissions does a user have
+// TODO: might want to check what permissions does a user have (edit, add)
 
 //? Get all devices
 //If not an admin, only see own devices

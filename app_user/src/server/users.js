@@ -1,6 +1,9 @@
 import express from "express"
 import client from "../server/client.js"
-import crypto from "crypto"
+//import crypto, { createHash } from "crypto"
+//const crypto = await import("node:crypto")
+import crypto, { createHash } from "crypto"
+
 
 import { validatePassword } from "../util/regexes.js"
 import { rolesPermissionFilter, permitAdminOrSelf, verifyJWT } from "../util/permission_middleware.js"
@@ -8,6 +11,7 @@ import { RoleOptions } from "../util/role_options.js"
 
 import { userDeleted } from "./queue.js"
 import { SignJWT } from "jose"
+import { console } from "inspector"
 
 const router = express.Router()
 export default router
@@ -86,6 +90,11 @@ router.post("/user", verifyJWT, rolesPermissionFilter(["admin"]), async (req, re
 
         let genUUID = crypto.randomUUID();
 
+        const hashAlgo = process.env.HASH_ALGO || 'sha256';
+        const hasher = crypto.createHash(hashAlgo)
+        hasher.update(req.body.password)
+        const pass = hasher.digest('hex')
+
         query = {
             name: "add_user",
             text: "insert into \"user\" (id, name, role, password) values ($1,$2,$3,$4);",
@@ -93,7 +102,7 @@ router.post("/user", verifyJWT, rolesPermissionFilter(["admin"]), async (req, re
                 genUUID,
                 req.body.name,
                 req.body.role,
-                crypto.createHash(process.env.HASH_ALGO).update(req.body.password).digest('hex'),
+                pass,
             ],
         }
         result = await client.query(query);
@@ -175,12 +184,20 @@ router.post("/login", async (req, res) => {
         return;
     }
 
+    let genUUID = crypto.randomUUID();
+
+    const hashAlgo = process.env.HASH_ALGO || 'sha256';
+    const hasher = createHash(hashAlgo)
+    hasher.update(req.body.password)
+    const pass = hasher.digest('hex')
+    //const pass = "bf889cd06ba9762409e6aed391953e101f2922f9c4db08d1e94b328c52b87a7c"
+
     const userLoginQuery = {
         name: "check_name_and_pass",
         text: "select id,role from \"user\" where name=$1 and password=$2",
         values: [
             req.body.name,
-            crypto.createHash(process.env.HASH_ALGO).update(req.body.password).digest('hex')
+            pass
         ]
     };
 
@@ -188,6 +205,7 @@ router.post("/login", async (req, res) => {
         const result = await client.query(userLoginQuery);
 
         if (result.rowCount != 1) {
+            console.log(result)
             res.status(401).send({
                 "message": "Incorrect login attempt"
             });

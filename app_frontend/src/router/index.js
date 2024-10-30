@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import VueCookies from "vue-cookies"
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import DeviceView from '@/views/tableViews/DeviceView.vue'
@@ -8,6 +9,7 @@ import EditUserView from '@/views/editViews/EditUserView.vue'
 import AddDeviceView from '@/views/addViews/AddDeviceView.vue'
 import EditDeviceView from '@/views/editViews/EditDeviceView.vue'
 import NavigationView from '@/views/NavigationView.vue'
+import ForbiddenView from '@/views/ForbiddenView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,7 +17,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      meta: { noAuth: true }
     },
     {
       path: '/nav',
@@ -25,6 +28,7 @@ const router = createRouter({
    {
     path: '/login',
     name: 'login',
+    meta: { noAuth: true },
     component: () => import('../views/LoginView.vue')
    },
    {
@@ -60,8 +64,22 @@ const router = createRouter({
    {
     path: '/:pathMatch(.*)*',
     component: NotFoundView
+   },
+   {
+    path: '/403',
+    component: ForbiddenView,
+    meta: { noAuth: true },
+    name: "Forbidden"
    }
   ]
+})
+
+router.beforeEach((to,from,next)=>{
+  if(to.meta.noAuth || VueCookies.get("token")){
+    return next();
+  }
+
+  return next({name: "Forbidden"});
 })
 
 export default router

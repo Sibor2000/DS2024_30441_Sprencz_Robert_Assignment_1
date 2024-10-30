@@ -1,0 +1,85 @@
+services:
+  user_db:
+    image: postgres
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_USER_DATABASE
+    ports:
+      - 3002:$DB_PORT
+    volumes:
+      - udb:/var/lib/postgresql/data
+
+  app_user:
+    depends_on:
+      - user_db
+    build: ./app_user
+    env_file:
+      - ./.env
+    ports:
+      - 3000:$BACKEND_PORT
+    environment:
+      - DB_HOST=user_db
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_DATABASE=$DB_USER_DATABASE
+      - DB_PORT=$DB_PORT
+      - JWT_SECRET=$JWT_SECRET
+      - JWT_ENC_ALGO=$JWT_ENC_ALGO
+      - JWT_EXPIRY=$JWT_EXPIRY
+      - HASH_ALGO=$HASH_ALGO
+      - AMQP_HOST=$AMQP_HOST
+      - AMQP_PASS=$AMQP_PASS
+
+  device_db:
+    image: postgres
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_DEVICE_DATABASE
+    ports:
+      - 3003:$DB_PORT
+    volumes:
+      - ddb:/var/lib/postgresql/data
+
+  app_device:
+    depends_on:
+      - app_user
+      - device_db
+    build: ./app_device
+    env_file:
+      - ./.env
+    ports:
+      - 3001:$DEVICE_PORT
+    environment:
+      - DB_HOST=device_db
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_DATABASE=$DB_DEVICE_DATABASE
+      - DB_PORT=$DB_PORT
+      - JWT_SECRET=$JWT_SECRET
+      - JWT_ENC_ALGO=$JWT_ENC_ALGO
+      - JWT_EXPIRY=$JWT_EXPIRY
+      - HASH_ALGO=$HASH_ALGO
+      - BACKEND_PORT=$DEVICE_PORT
+      - AMQP_HOST=$AMQP_HOST
+      - AMQP_PASS=$AMQP_PASS
+
+  app_frontend:
+    depends_on:
+      - app_user
+    build: ./app_frontend
+    env_file:
+      - ./.env
+    ports:
+      - 5000:3000
+    environment:
+      - VITE_USER_PORT=$BACKEND_PORT
+      - VITE_DEVICE_PORT=$DEVICE_PORT
+volumes:
+  udb:
+  ddb:
