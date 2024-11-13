@@ -4,7 +4,7 @@ import crypto from "crypto"
 import { validateUUID } from "../util/regexes.js"
 
 export async function userDeleted() {
-    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/xnfrdwuo`, function(error0, connection){
+    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/${process.env.AMQP_HOST}`, function(error0, connection){
         if(error0){
             throw error0
         }
@@ -41,7 +41,7 @@ export async function userDeleted() {
 }
 
 export async function checkForUser(req, res, next) {
-    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/xnfrdwuo`, function(error0, connection){
+    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/${process.env.AMQP_HOST}`, function(error0, connection){
         if(error0){
             throw error0
         }
