@@ -5,7 +5,7 @@ import crypto from "crypto"
 import { validatePassword, validateUUID } from "../util/regexes.js"
 import { permitAdminOrSelf, verifyJWT } from "../util/permission_middleware.js"
 import { RoleOptions } from "../util/role_options.js"
-import { checkForUser } from "./queue.js"
+import { checkForUser, deviceDeleteMonitor } from "./queue.js"
 
 const router = express.Router()
 export default router
@@ -146,6 +146,10 @@ router.delete("/user/:id/devices", verifyJWT, permitAdminOrSelf, async (req, res
 
     try {
         const result = await client.query(query);
+
+        if(result.rowCount>0){
+            deviceDeleteMonitor(req.params.id)
+        }
 
         res.send({
             rowCount: result.rowCount,

@@ -10,6 +10,8 @@ import AddDeviceView from '@/views/addViews/AddDeviceView.vue'
 import EditDeviceView from '@/views/editViews/EditDeviceView.vue'
 import NavigationView from '@/views/NavigationView.vue'
 import ForbiddenView from '@/views/ForbiddenView.vue'
+import MonitorChartView from '@/views/MonitorChartView.vue'
+import WebsocketTestView from '@/views/WebsocketTestView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +64,16 @@ const router = createRouter({
     component: EditDeviceView
    },
    {
+    path: '/monitor_chart/:id',
+    name: 'monitor_chart',
+    component: MonitorChartView
+   },
+   {
+    path:'/websocket_test',
+    name: 'websocket_test',
+    component: WebsocketTestView
+   },
+   {
     path: '/:pathMatch(.*)*',
     component: NotFoundView
    },
@@ -75,6 +87,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to,from,next)=>{
+  return next();
+
   if(to.meta.noAuth || VueCookies.get("token")){
     return next();
   }

@@ -21,14 +21,32 @@ export async function userDeleted() {
             })
     
             channel.consume(queue, async function(msg){
-                const query = {
+
+                const select_query = {
+                    name: "select_device_by_ownerid",
+                    text: "select * from \"device\" where owner_id=$1",
+                    values: [msg.content.toString()]
+                }
+                
+                try {
+                    const result = await client.query(select_query);
+
+                    result.rows.forEach(element => {
+                        deviceDeleteMonitor(element.id)
+                    })
+                } catch (error) {
+                    console.log(error)
+                }
+
+
+                const delete_query = {
                     name: "delete_device_by_userid",
                     text: "delete from \"device\" where owner_id=$1",
                     values: [msg.content.toString()]
                 }
             
                 try {
-                    const result = await client.query(query);
+                    const result = await client.query(delete_query);
                 } catch (error) {
                     console.log(error);
                 }
@@ -88,6 +106,29 @@ export async function checkForUser(req, res, next) {
                     noAck: false
                 })
             })
+        })
+    })
+}
+
+export async function deviceDeleteMonitor(message) {
+    amqp.connect(`amqps://${process.env.AMQP_HOST}:${process.env.AMQP_PASS}@sparrow.rmq.cloudamqp.com/${process.env.AMQP_HOST}`, function(error0, connection){
+        if(error0){
+            throw error0
+        }
+    
+        connection.createChannel(function(error1, channel) {
+            if(error1){
+                throw error1
+            }
+    
+            var queue = "device_deleted"
+    
+            channel.assertQueue(queue, {
+                durable: false
+            })
+    
+            channel.sendToQueue(queue, Buffer.from(message))
+            //console.log(`Sent ${msg}`)
         })
     })
 }
