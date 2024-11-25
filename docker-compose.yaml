@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=$DB_PASSWORD
       - POSTGRES_DB=$DB_USER_DATABASE
     ports:
-      - 3002:$DB_PORT
+      - 3101:$DB_PORT
     volumes:
       - udb:/var/lib/postgresql/data
 
@@ -19,7 +19,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - 3000:$BACKEND_PORT
+      - 3001:$USER_PORT
     environment:
       - DB_HOST=user_db
       - DB_USER=$DB_USER
@@ -30,6 +30,7 @@ services:
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
       - HASH_ALGO=$HASH_ALGO
+      - BACKEND_PORT=$USER_PORT
       - AMQP_HOST=$AMQP_HOST
       - AMQP_PASS=$AMQP_PASS
 
@@ -42,7 +43,7 @@ services:
       - POSTGRES_PASSWORD=$DB_PASSWORD
       - POSTGRES_DB=$DB_DEVICE_DATABASE
     ports:
-      - 3003:$DB_PORT
+      - 3102:$DB_PORT
     volumes:
       - ddb:/var/lib/postgresql/data
 
@@ -54,7 +55,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - 3001:$DEVICE_PORT
+      - 3002:$DEVICE_PORT
     environment:
       - DB_HOST=device_db
       - DB_USER=$DB_USER
@@ -69,17 +70,58 @@ services:
       - AMQP_HOST=$AMQP_HOST
       - AMQP_PASS=$AMQP_PASS
 
+  monitor_db:
+    image: postgres
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_MONITOR_DATABASE
+    ports:
+      - 3103:$DB_PORT
+    volumes:
+      - mdb:/var/lib/postgresql/data
+
+  app_monitor:
+    depends_on:
+      - app_user
+      - app_device
+      - monitor_db
+    build: ./app_monitor
+    env_file:
+      - ./.env
+    ports:
+      - 3003:$MONITOR_PORT
+    environment:
+      - DB_HOST=monitor_db
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_DATABASE=$DB_MONITOR_DATABASE
+      - DB_PORT=$DB_PORT
+      - JWT_SECRET=$JWT_SECRET
+      - JWT_ENC_ALGO=$JWT_ENC_ALGO
+      - JWT_EXPIRY=$JWT_EXPIRY
+      - HASH_ALGO=$HASH_ALGO
+      - BACKEND_PORT=$MONITOR_PORT
+      - AMQP_HOST=$AMQP_HOST
+      - AMQP_PASS=$AMQP_PASS
+
   app_frontend:
     depends_on:
       - app_user
+      - app_device
+      - app_monitor
     build: ./app_frontend
     env_file:
       - ./.env
     ports:
-      - 5000:3000
+      - 5000:$FRONTEND_PORT
     environment:
-      - VITE_USER_PORT=$BACKEND_PORT
+      - VITE_USER_PORT=$USER_PORT
       - VITE_DEVICE_PORT=$DEVICE_PORT
+      - VITE_MONITOR_PORT=$MONITOR_PORT
 volumes:
   udb:
   ddb:
+  mdb:

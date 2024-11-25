@@ -1,20 +1,21 @@
 <template>
 
-    <RouterLink to="users" v-slot="{ navigate }">
-        <button @click="navigate">
-            Users
-        </button>
-    </RouterLink>
+    <div>
+        <RouterLink to="users" v-slot="{ navigate }">
+            <button @click="navigate">
+                Users
+            </button>
+        </RouterLink>
 
-    <RouterLink to="/device/add" v-slot="{ navigate }">
-        <button @click="navigate">
-            Add device
-        </button>
-    </RouterLink>
+        <RouterLink to="/device/add" v-slot="{ navigate }">
+            <button @click="navigate">
+                Add device
+            </button>
+        </RouterLink>
+    </div>
 
-
-    <CustomTable :tableData="tableData" :tableColumns="tableColumns" :baseEditLink="editLink"
-        :baseDeleteLink="deleteLink" />
+    <CustomTable :tableData="tableData" :tableColumns="tableColumns" :baseMonitorLink="monitorLink" :baseEditLink="editLink"
+        :baseDeleteLink="deleteLink" :monitored="true" />
 </template>
 
 
@@ -30,6 +31,7 @@ export default {
         return {
             tableColumns: [],
             tableData: [],
+            monitorLink: '/device',
             editLink: `/device`,
             deleteLink: `http://${import.meta.env.VITE_DEVICE_HOST}:${import.meta.env.VITE_DEVICE_PORT}/device`
         }

@@ -244,12 +244,3 @@ router.get("/login", verifyJWT, (req, res) => {
     })
     return
 })
-
-/*
-//?Logout
-router.post("/logout",(req,res)=>{
-    // Blacklist? 
-
-    //Also need to use rabbitmq to send it to the other side
-})
-*/

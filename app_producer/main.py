@@ -4,10 +4,10 @@ import os
 from datetime import datetime, timedelta
 import csv
 import json
+import time
+import sys
 
 load_dotenv()
-
-device_id = "cd1f9790-d199-4c7f-97d8-0bad4bfbc8f9"
 
 host = os.getenv('AMQP_HOST')
 password = os.getenv('AMQP_PASS')
@@ -22,20 +22,23 @@ date = datetime.now()
 
 index = 0
 
-with open('./dataset/mini_sensor.csv', mode='r') as file:
+test_device_ids = ["966bbbda-f1f1-411f-b034-ce7bfc73c745", "c24d54cf-7815-4a6a-a7fe-7de0a922418d"]
+
+with open('./dataset/overconsumer.csv', mode='r') as file:
     csv_reader = csv.reader(file)
 
     for row in csv_reader:
         measurement = {
             "timestamp": str(int(date.timestamp() * 1000 )),
             "measurement_value": row[0],
-            "device_id": "cd1f9790-d199-4c7f-97d8-0bad4bfbc8f9"
+            "device_id": test_device_ids[int(sys.argv[1])]
         }
-        #TODO: change device id programatically
+
         print(index)
         index=index+1
         date = date + timedelta(minutes=10)
-        
+
         channel.basic_publish(exchange='', routing_key="producer_to_monitor", body=json.dumps(measurement))
+        time.sleep(2)
 
 connection.close()

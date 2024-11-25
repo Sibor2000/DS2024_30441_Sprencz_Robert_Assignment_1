@@ -5,10 +5,11 @@ import monitorRouter from "./monitored.js"
 import client from "./client.js"
 import cors from "cors"
 import { amqpListen } from "./queue.js"
-//import setUpDb from "../util/db_table_setup.js"
+import {connectWebsocket} from "./websocket.js"
+import setUpDb from "../util/db_table_setup.js"
 
-//setUpDb();
-await client.connect();
+setUpDb();
+//await client.connect();
 
 const app = express();
 
@@ -19,8 +20,9 @@ app.use(cors(),monitorRouter);
 //takeMeasurements();
 
 amqpListen();
+connectWebsocket();
 
 const port = process.env.BACKEND_PORT;
 app.listen(port, ()=>{
-    console.log(`Monitoring server running on: ${process.env.BACKEND_PORT}`);
+    console.log(`Monitor server running on: ${process.env.BACKEND_PORT}`);
 })

@@ -7,11 +7,11 @@ import { validateUUID } from "../util/regexes.js"
 const router = express.Router()
 export default router
 
+//? Get measurements for a device
+router.get("/device/:id", /*verifyJWT,*/ async (req, res) => {
 
-router.get("/device/:id", /*verifyJWT,*/ async(req,res)=>{
-
-    if(!validateUUID(req.params.id)){
-        return res.status(400).send({message:"Invalid UUID"})
+    if (!validateUUID(req.params.id)) {
+        return res.status(400).send({ message: "Invalid UUID" })
     }
 
     const query = {
@@ -19,7 +19,7 @@ router.get("/device/:id", /*verifyJWT,*/ async(req,res)=>{
         text: "select * from \"energy_consumption\" where device_id=$1",
         values: [req.params.id]
     }
-    
+
     try {
         const result = await client.query(query);
         if (result.rowCount == 0) {
@@ -31,8 +31,8 @@ router.get("/device/:id", /*verifyJWT,*/ async(req,res)=>{
         const tableData = []
 
         const measurements = result.rows;
-        measurements.sort((a,b)=>a.time - b.time)
-        measurements.forEach(element=>{
+        measurements.sort((a, b) => a.time - b.time)
+        measurements.forEach(element => {
             console.log(element)
             tableLabels.push(new Date(element.time * 1).toLocaleString())
             tableData.push(element.measurement_value)
@@ -40,9 +40,31 @@ router.get("/device/:id", /*verifyJWT,*/ async(req,res)=>{
 
         res.send({
             tableLabels: tableLabels,
-            tableData:tableData
+            tableData: tableData
         });
-    }catch (error){
+    } catch (error) {
         console.log(error);
     }
+})
+
+//? Get measurements for a list of devices
+router.get("/devices", async (req, res) => {
+
+    /*
+    console.log(req.query)
+    res.sendStatus(200)
+    */
+    const idList = req.query.ids
+
+    console.log(idList)
+
+    const placeholders = idList.map((_, index) => `$${index + 1}`).join(',');
+    const query = {
+        text: `SELECT * FROM "energy_consumption" WHERE device_id IN (${placeholders})`,
+        values: idList
+    };
+
+    const result = await client.query(query)
+
+    res.send(result.rows)
 })

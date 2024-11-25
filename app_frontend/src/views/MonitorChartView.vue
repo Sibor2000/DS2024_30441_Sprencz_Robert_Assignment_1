@@ -77,37 +77,6 @@ export default {
 
                     ]
                 }
-
-                /*
-                This logic has been moved to the monitor,
-                also I consider the measurements to be the already cumulative ones
-
-                const extractedData = res.data
-                const newLabels = []
-                const newData = []
-
-                let cumulativeConsumption = 0
-
-                extractedData.sort((a,b)=>a.time - b.time)
-                extractedData.forEach(element => {
-                    newLabels.push(new Date(element.time * 1).toLocaleString())
-                    //newData.push(element.measurement_value)
-                    cumulativeConsumption+=element.measurement_value
-                    newData.push(cumulativeConsumption)
-                });
-
-                this.chartData = {
-                    ...this.chartData,
-                    labels: newLabels,
-                    datasets: [
-                        {
-                            ...this.chartData.datasets[0],
-                            data: newData
-                        }
-
-                    ]
-                }
-                */
             } catch (error) {
                 console.log(error)
             }

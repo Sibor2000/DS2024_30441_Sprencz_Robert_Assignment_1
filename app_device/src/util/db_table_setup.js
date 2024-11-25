@@ -7,7 +7,7 @@ export default async function setUpDb() {
         console.log(await client.query(`
         CREATE SCHEMA IF NOT EXISTS public;
         set search_path to public;
-        
+
         create table if not exists "device"
 (
     id                   uuid,

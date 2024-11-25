@@ -8,8 +8,8 @@ import cors from "cors"
 import { checkForUser } from "./queue.js"
 import setUpDb from "../util/db_table_setup.js"
 
-//await setUpDb();
-await client.connect();
+await setUpDb();
+//await client.connect();
 
 const app = express();
 

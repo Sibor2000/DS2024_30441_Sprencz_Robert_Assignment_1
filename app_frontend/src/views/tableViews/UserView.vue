@@ -1,23 +1,27 @@
 <template>
 
-    <RouterLink to="/devices" v-slot=" {navigate}">
+    <div>
+        <p v-if="message">
+            Message from server: {{ message }}
+        </p>
+    </div>
+
+    <div>
+        <RouterLink to="/devices" v-slot="{ navigate }">
             <button @click="navigate">
                 Devices
             </button>
-    </RouterLink>
+        </RouterLink>
 
-    <RouterLink to="/user/add" v-slot=" {navigate}">
+        <RouterLink to="/user/add" v-slot="{ navigate }">
             <button @click="navigate">
                 Add user
             </button>
-    </RouterLink>
+        </RouterLink>
+    </div>
 
-    
-    <CustomTable 
-    :tableData="tableData" 
-    :tableColumns="tableColumns" 
-    :baseEditLink="editLink" 
-    :baseDeleteLink="deleteLink"/>
+    <CustomTable :tableData="tableData" :tableColumns="tableColumns" :baseMonitorLink="monitorLink" :baseEditLink="editLink"
+        :baseDeleteLink="deleteLink" :monitored="true" />
 </template>
 
 
@@ -26,36 +30,54 @@ import { user_instance } from '@/utilities/request';
 import CustomTable from '@/components/CustomTable.vue';
 
 export default {
-    components:{
+    components: {
         CustomTable,
     },
-    data(){
-        return{
+    data() {
+        return {
+            message: null,
             tableColumns: [],
             tableData: [],
+            monitorLink: `/user`,
             editLink: `/user`,
             deleteLink: `http://${import.meta.env.VITE_USER_HOST}:${import.meta.env.VITE_USER_PORT}/user`
         }
     },
-    created(){
+    created() {
         this.getUsers()
+        this.socketSetup()
     },
     methods: {
         async getUsers() {
             try {
-                const res = await user_instance.get('/users',{ headers: {
-                    'authorization': `Bearer ${this.$cookies.get("token")}`
-                }})
-                this.tableColumns = res.data.fields.map((f)=>({
+                const res = await user_instance.get('/users', {
+                    headers: {
+                        'authorization': `Bearer ${this.$cookies.get("token")}`
+                    }
+                })
+                this.tableColumns = res.data.fields.map((f) => ({
                     label: f,
                     field: f
                 }));
                 this.tableData = res.data.rows;
-                
+
                 console.log(res)
             } catch (error) {
                 console.error(error)
             }
+        },
+
+        socketSetup() {
+            const socket = new WebSocket('ws:/localhost:4000');
+
+            socket.addEventListener('message', (event) => {
+                console.log(event)
+                this.message = JSON.parse(event.data).message
+            })
+
+            socket.addEventListener('close', () => {
+                console.log("Connection closed")
+            })
         }
     }
 }

@@ -11,7 +11,8 @@ import EditDeviceView from '@/views/editViews/EditDeviceView.vue'
 import NavigationView from '@/views/NavigationView.vue'
 import ForbiddenView from '@/views/ForbiddenView.vue'
 import MonitorChartView from '@/views/MonitorChartView.vue'
-import WebsocketTestView from '@/views/WebsocketTestView.vue'
+import UserCalendarView from '@/views/UserCalendarView.vue'
+import UserConsumptionView from '@/views/UserConsumptionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,14 +65,19 @@ const router = createRouter({
     component: EditDeviceView
    },
    {
-    path: '/monitor_chart/:id',
-    name: 'monitor_chart',
+    path: '/device/monitor_chart/:id',
+    name: 'device_monitor_chart',
     component: MonitorChartView
    },
    {
-    path:'/websocket_test',
-    name: 'websocket_test',
-    component: WebsocketTestView
+    path:'/user_calendar',
+    name: 'user_calendar',
+    component: UserCalendarView
+   },
+   {
+    path:'/user/monitor_chart/:id',
+    name:'user_consumption',
+    component: UserConsumptionView
    },
    {
     path: '/:pathMatch(.*)*',
@@ -87,7 +93,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to,from,next)=>{
-  return next();
+  //return next();
 
   if(to.meta.noAuth || VueCookies.get("token")){
     return next();

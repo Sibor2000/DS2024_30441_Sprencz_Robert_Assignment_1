@@ -21,7 +21,7 @@
                     <option v-for="owner in ownerOptions" :key="owner.id" :value="owner.id">{{ owner.name }}</option>
                 </select>
             </p>
-            
+
             <button type="submit" v-on:click.prevent="editDevice"> Edit Device</button>
 
             <p> {{ message }}</p>
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import router from '@/router'; 
+import router from '@/router';
 import { device_instance, user_instance } from '@/utilities/request';
 
 export default {
@@ -46,9 +46,9 @@ export default {
         }
     },
     methods:{
-        
+
         async editDevice(){
-            
+
             if(this.input.description == "" || this.input.address=="" || this.input.max_nrg_con_per_hour =="" || this.input.owner_id ==""){
                 this.message = "Can not be empty"
                 return
@@ -56,8 +56,8 @@ export default {
 
             const req_input = this.input
             await device_instance.put(
-                "/device/"+this.$route.params.id, 
-                req_input, 
+                "/device/"+this.$route.params.id,
+                req_input,
                 { headers: {
                     'Content-Type': 'application/json',
                     'authorization': `Bearer ${this.$cookies.get("token")}`
@@ -65,16 +65,16 @@ export default {
             .then(response => {
                 console.log(response)
                 this.message = "Edit successfull\n"
-                
+
                 setTimeout(()=>{
                     router.push('/devices')
                 }, 1000)
-                
+
             })
             .catch(error => {
                 this.message = error.response.data.message
             });
-            
+
         },
 
         async fetchOwners(){

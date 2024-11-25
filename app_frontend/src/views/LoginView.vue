@@ -10,7 +10,7 @@
                 <input type="password" id="password" v-model="input.password">
 
             </p>
-            
+
             <button type="submit" v-on:click.prevent="login"> Login</button>
 
             <p> {{ message }}</p>
@@ -37,27 +37,28 @@ export default {
                 this.message = "Can not be empty"
                 return
             }
-            
+
             const req_input = this.input
             await user_instance.post('/login',
-                req_input, 
+                req_input,
                 { headers: {
                     'Content-Type': 'application/json'
             }})
             .then(response => {
                 this.message = `login successful\n`
-                
+
                 this.$cookies.set("token",response.data.token)
 
                 setTimeout(()=>{
                     router.push('/nav')
                 }, 1000)
-                
+
             })
             .catch(error => {
+                console.log(error)
                 this.message = error.response.data.message
             });
-            
+
         }
     }
 }

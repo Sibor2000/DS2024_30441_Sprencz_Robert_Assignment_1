@@ -3,10 +3,9 @@
         <thead>
             <tr>
                 <th v-for="column in tableColumns" :key="column.field"> {{ column.label }}</th>
-
+                <th v-if="monitored">Consumption Chart</th>
                 <th>Edit</th>
                 <th>Delete</th>
-                
             </tr>
         </thead>
 
@@ -18,19 +17,20 @@
                     </slot>
                 </td>
 
-                <td>
-                    <!--
-                    <button>
-                        <RouterLink :to=row.edit>Edit</RouterLink>
-                    </button>
-                    -->
+                <td v-if="monitored">
+                    <RouterLink :to="baseMonitorLink+'/monitor_chart/'+row.monitor" v-slot=" {navigate}">
+                        <button @click="navigate">
+                            Chart
+                        </button>
+                    </RouterLink>
+                </td>
 
+                <td>
                     <RouterLink :to="baseEditLink+'/edit/'+row.edit" v-slot=" {navigate}">
                         <button @click="navigate">
                             Edit
                         </button>
                     </RouterLink>
-
                 </td>
                 <td>
 
@@ -38,7 +38,6 @@
                         Delete
                     </button>
                 </td>
-                
 
             </tr>
         </tbody>
@@ -54,8 +53,10 @@ export default{
     props: {
         tableData: Array,
         tableColumns: Array,
+        baseMonitorLink: String,
         baseEditLink: String,  // /user/edit
-        baseDeleteLink: String
+        baseDeleteLink: String,
+        monitored: Boolean
     },
     setup(props){
         console.log(props)
@@ -68,6 +69,7 @@ export default{
 
             return  this.tableData.map((f)=>({
                     ...f,
+                    monitor: f.id,
                     edit: f.id,
                     delete: f.id,
         }))
