@@ -51,7 +51,7 @@ router.get("/device/:id", verifyJWT, async (req, res) => {
     try {
         const result = await client.query(query);
         if (result.rowCount == 0) {
-            res.sendStatus(404);
+            res.sendStatus(204);
             return
         }
         res.send(result.rows.at(0));
@@ -120,7 +120,7 @@ router.put("/device/:id", verifyJWT, async (req, res) => {
         const result = await client.query(query);
 
         if (result.rowCount == 0) {
-            res.sendStatus(404);
+            res.sendStatus(204);
             return;
         }
 

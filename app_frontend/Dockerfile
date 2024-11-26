@@ -10,7 +10,7 @@ COPY . ./
 
 RUN npm i -g serve
 
-EXPOSE 3001
+EXPOSE 3000
 
 RUN npm run build
 
