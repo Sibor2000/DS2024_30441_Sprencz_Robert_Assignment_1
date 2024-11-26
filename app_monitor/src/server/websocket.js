@@ -10,7 +10,7 @@ export async function connectWebsocket() {
     /*
     wss.on('connection', function connection(ws){
         ws.send(JSON.stringify({message: "SUP??"}))
-    
+
         ws.on('close', () => {
             console.log('client disconnected')
         })

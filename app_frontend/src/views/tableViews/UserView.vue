@@ -68,7 +68,7 @@ export default {
         },
 
         socketSetup() {
-            const socket = new WebSocket('ws:/localhost:4000');
+            const socket = new WebSocket(`ws:/${import.meta.env.VITE_WEBSOCKET1_HOST}:${import.meta.env.VITE_WEBSOCKET1_PORT}`);
 
             socket.addEventListener('message', (event) => {
                 console.log(event)

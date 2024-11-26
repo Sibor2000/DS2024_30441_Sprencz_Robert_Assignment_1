@@ -22,7 +22,7 @@ date = datetime.now()
 
 index = 0
 
-test_device_ids = ["966bbbda-f1f1-411f-b034-ce7bfc73c745", "c24d54cf-7815-4a6a-a7fe-7de0a922418d"]
+test_device_ids = ["b96b8a52-79c0-425a-886c-39c5911b90e7", "c88c3f63-e9f4-4b49-86c3-53f4cb64fbad"]
 
 with open('./dataset/overconsumer.csv', mode='r') as file:
     csv_reader = csv.reader(file)
