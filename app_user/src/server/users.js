@@ -39,6 +39,26 @@ router.get("/users", verifyJWT, /*rolesPermissionFilter(["admin"]),*/ async (req
     }
 })
 
+//? Get all other user id-s, in case of user, only get id of admins
+router.get("/users_id", verifyJWT, async (req, res) => {
+    const query = req.user.role=="admin" ? `select id from "user" where id<>'${req.user.id}'` : `select id from "user" where role = 'admin' and id<>'${req.user.id}'`
+
+    console.log(req.user.role)
+
+    try {
+        const result = await client.query(query);
+        const preparedResult = {
+            rowCount: result.rowCount,
+            rows: result.rows
+        }
+
+        res.send(preparedResult);
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+
 //? Get user by ID
 // If user is not an admin, or id doesn't match, reject
 router.get("/user/:id", verifyJWT, permitAdminOrSelf, async (req, res) => {
@@ -190,7 +210,6 @@ router.post("/login", async (req, res) => {
     const hasher = createHash(hashAlgo)
     hasher.update(req.body.password)
     const pass = hasher.digest('hex')
-    //const pass = "bf889cd06ba9762409e6aed391953e101f2922f9c4db08d1e94b328c52b87a7c"
 
     const userLoginQuery = {
         name: "check_name_and_pass",
@@ -224,6 +243,7 @@ router.post("/login", async (req, res) => {
 
         res.send({
             "message": "done",
+            "role":result.rows.at(0).role,
             "token": token
         })
 

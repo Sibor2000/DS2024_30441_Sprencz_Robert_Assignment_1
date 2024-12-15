@@ -40,7 +40,7 @@ export default {
             tableData: [],
             monitorLink: `/user`,
             editLink: `/user`,
-            deleteLink: `http://${import.meta.env.VITE_USER_HOST}:${import.meta.env.VITE_USER_PORT}/user`
+            deleteLink: `${import.meta.env.VITE_USER_URL}/user`
         }
     },
     created() {
@@ -68,7 +68,7 @@ export default {
         },
 
         socketSetup() {
-            const socket = new WebSocket(`ws:/${import.meta.env.VITE_WEBSOCKET1_HOST}:${import.meta.env.VITE_WEBSOCKET1_PORT}`);
+            const socket = new WebSocket(`${import.meta.env.VITE_MONITOR_WEBSOCKET_URL}`);
 
             socket.addEventListener('message', (event) => {
                 console.log(event)

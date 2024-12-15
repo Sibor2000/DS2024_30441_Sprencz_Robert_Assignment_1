@@ -10,4 +10,10 @@
                 Devices
             </button>
     </RouterLink>
+
+    <RouterLink to="/chat" v-slot=" {navigate}">
+            <button @click="navigate">
+                Chat
+            </button>
+    </RouterLink>
 </template>

@@ -1,7 +1,7 @@
 <template>
     <form>
             <p>
-                <label>Name</label>
+                <label>UName</label>
                 <input type="text" id="name" v-model="input.name">
             </p>
 
@@ -20,6 +20,7 @@
 <script>
 import {user_instance} from '@/utilities/request';
 import router from '@/router';
+import axios from 'axios';
 
 export default {
     data(){
@@ -39,6 +40,7 @@ export default {
             }
 
             const req_input = this.input
+
             await user_instance.post('/login',
                 req_input,
                 { headers: {
@@ -47,7 +49,8 @@ export default {
             .then(response => {
                 this.message = `login successful\n`
 
-                this.$cookies.set("token",response.data.token)
+                this.$cookies.set("token", response.data.token)
+                this.$cookies.set("role", response.data.role)
 
                 setTimeout(()=>{
                     router.push('/nav')
@@ -58,7 +61,6 @@ export default {
                 console.log(error)
                 this.message = error.response.data.message
             });
-
         }
     }
 }

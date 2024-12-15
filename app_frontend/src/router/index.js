@@ -13,6 +13,8 @@ import ForbiddenView from '@/views/ForbiddenView.vue'
 import MonitorChartView from '@/views/MonitorChartView.vue'
 import UserCalendarView from '@/views/UserCalendarView.vue'
 import UserConsumptionView from '@/views/UserConsumptionView.vue'
+import ChatView from '@/views/ChatView.vue'
+import ConversationView from '@/views/ConversationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +39,7 @@ const router = createRouter({
    {
     path: '/devices',
     name: 'devices',
+    meta: { noAuth: true },
     component: DeviceView
    },
    {
@@ -78,6 +81,17 @@ const router = createRouter({
     path:'/user/monitor_chart/:id',
     name:'user_consumption',
     component: UserConsumptionView
+   },
+   {
+    path:'/chat',
+    name:'chat_hub',
+    meta: { noAuth: true },
+    component:ChatView
+   },
+   {
+    path:'/conversation/:id',
+    name:'conversation',
+    component:ConversationView
    },
    {
     path: '/:pathMatch(.*)*',

@@ -1,6 +1,63 @@
-app.localhost:80 {
-    reverse_proxy /user app_user:{$USER_PORT}
-    reverse_proxy /device app_device:{$DEVICE_PORT}
-    reverse_proxy /monitor app_monitor:{$MONITOR_PORT}
-    reverse_proxy / app_frontend:5000
+localhost:80
+{
+
+    #@cors_preflight {
+	#	method OPTIONS
+	#}
+	#respond @cors_preflight 204
+    #header {
+    #    Access-Control-Allow-Origin *
+    #    Access-Control-Allow-Methods GET,POST,OPTIONS,HEAD,PATCH,PUT,DELETE
+    #    Access-Control-Allow-Headers User-Agent,Content-Type,X-Api-Key
+    #    Access-Control-Max-Age 86400
+    #    Allow GET,POST,OPTIONS,HEAD,PATCH,PUT,DELETE
+    #}
+
+# Route /api/users requests to backend_auth and rewrite to /api/*
+route /api/user/* {
+    uri strip_prefix /api/user
+    reverse_proxy app_user:3001
+}
+
+## Route /api/devices requests to backend_devices and rewrite to /api/*
+route /api/device/* {
+    uri strip_prefix /api/device
+    reverse_proxy app_device:3002
+}
+
+route /api/monitor/* {
+    uri strip_prefix /api/monitor
+    reverse_proxy app_monitor:3003
+}
+
+route /api/mws {
+    uri strip_prefix /api/mws
+    reverse_proxy app_monitor:4000
+}
+
+route /api/chat/* {
+    uri strip_prefix /api/chat
+    reverse_proxy app_chat:3004
+}
+
+route /api/cws {
+    uri strip_prefix /api/cws
+    reverse_proxy app_chat:4001
+}
+
+# Return 404 for any other /api/* requests
+#route /api/* {
+#route /* {
+#    respond 404
+#}
+
+# Serve the Vue app for all other routes
+root * /srv/vue/dist
+file_server
+
+# Fallback to index.html for client-side routing
+route {
+    try_files {path} /index.html
+}
+
 }

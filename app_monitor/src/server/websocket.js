@@ -5,7 +5,7 @@ let wss
 
 export async function connectWebsocket() {
     dotenv.config()
-    wss = new WebSocketServer({port: Number(process.env.WEBSOCKET_PORT)})
+    wss = new WebSocketServer({port: Number(process.env.MONITOR_WEBSOCKET_PORT)})
 
     /*
     wss.on('connection', function connection(ws){

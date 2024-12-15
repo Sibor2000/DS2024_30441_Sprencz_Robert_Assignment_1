@@ -18,8 +18,8 @@ services:
     build: ./app_user
     env_file:
       - ./.env
-    ports:
-      - 3001:$USER_PORT
+    #ports:
+    #  - 3001:$USER_PORT
     environment:
       - DB_HOST=user_db
       - DB_USER=$DB_USER
@@ -30,13 +30,12 @@ services:
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
       - HASH_ALGO=$HASH_ALGO
-      - BACKEND_PORT=$USER_PORT
+      - USER_PORT=$USER_PORT
       - AMQP_HOST=$AMQP_HOST
       - AMQP_PASS=$AMQP_PASS
     deploy:
       mode: replicated
-#      replicas: 2
-      replicas: 1
+      replicas: 2
 
   device_db:
     image: postgres
@@ -46,8 +45,8 @@ services:
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASSWORD
       - POSTGRES_DB=$DB_DEVICE_DATABASE
-    ports:
-      - 3102:$DB_PORT
+    #ports:
+    #  - 3102:$DB_PORT
     volumes:
       - ddb:/var/lib/postgresql/data
 
@@ -58,8 +57,8 @@ services:
     build: ./app_device
     env_file:
       - ./.env
-    ports:
-      - 3002:$DEVICE_PORT
+    #ports:
+    #  - 3002:$DEVICE_PORT
     environment:
       - DB_HOST=device_db
       - DB_USER=$DB_USER
@@ -70,13 +69,12 @@ services:
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
       - HASH_ALGO=$HASH_ALGO
-      - BACKEND_PORT=$DEVICE_PORT
+      - DEVICE_PORT=$DEVICE_PORT
       - AMQP_HOST=$AMQP_HOST
       - AMQP_PASS=$AMQP_PASS
     deploy:
       mode: replicated
-#      replicas: 2
-      replicas: 1
+      replicas: 2
 
   monitor_db:
     image: postgres
@@ -99,9 +97,9 @@ services:
     build: ./app_monitor
     env_file:
       - ./.env
-    ports:
-      - 3003:$MONITOR_PORT
-      - 4000:$WEBSOCKET1_PORT
+    #ports:
+    #  - 3003:$MONITOR_PORT
+    #  - 4000:$MONITOR_WEBSOCKET_PORT
     environment:
       - DB_HOST=monitor_db
       - DB_USER=$DB_USER
@@ -112,38 +110,73 @@ services:
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
       - HASH_ALGO=$HASH_ALGO
-      - BACKEND_PORT=$MONITOR_PORT
-      - WEBSOCKET_PORT=$WEBSOCKET1_PORT
+      - MONITOR_PORT=$MONITOR_PORT
+      - MONITOR_WEBSOCKET_PORT=$MONITOR_WEBSOCKET_PORT
       - AMQP_HOST=$AMQP_HOST
       - AMQP_PASS=$AMQP_PASS
+
+  chat_db:
+    image: postgres
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_CHAT_DATABASE
+    ports:
+      - 3104:$DB_PORT
+    volumes:
+      - cdb:/var/lib/postgresql/data
+
+  app_chat:
+    depends_on:
+      - chat_db
+    build: ./app_chat
+    env_file:
+      - ./.env
+    environment:
+      - DB_HOST=chat_db
+      - DB_USER=$DB_USER
+      - DB_PORT=$DB_PORT
+      - DB_DATABASE=$DB_CHAT_DATABASE
+      - DB_PASSWORD=$DB_PASSWORD
+      - CHAT_PORT=$CHAT_PORT
+      - CHAT_WEBSOCKET_PORT=$CHAT_WEBSOCKET_PORT
+      - HASH_ALGO=$HASH_ALGO
+      - JWT_SECRET=$JWT_SECRET
+      - JWT_ENC_ALGO=$JWT_ENC_ALGO
+      - JWT_EXPIRY=$JWT_EXPIRY
 
   app_frontend:
     depends_on:
       - app_user
       - app_device
       - app_monitor
+      - app_chat
     build: ./app_frontend
+    volumes:
+      - app_fr:/src/dist
     env_file:
       - ./.env
-    ports:
-      - 5000:$FRONTEND_PORT
+    #ports:
+      #- 5000:$FRONTEND_PORT
     environment:
       - VITE_USER_URL=$VITE_USER_URL
       - VITE_DEVICE_URL=$VITE_DEVICE_URL
       - VITE_MONITOR_URL=$VITE_MONITOR_URL
-      - VITE_WEBSOCKET1_HOST=$WEBSOCKET1_HOST
-      - VITE_WEBSOCKET1_PORT=$WEBSOCKET1_PORT
+      - VITE_MONITOR_WEBSOCKET_URL=$VITE_MONITOR_WEBSOCKET_URL
 
   caddy:
     image: caddy
     container_name: caddy
     ports:
       - 80:80
-      - 443:443
+      #- 443:443
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+      - app_fr:/srv/vue/dist
     depends_on:
       - app_user
       - app_device
@@ -154,5 +187,7 @@ volumes:
   udb:
   ddb:
   mdb:
+  cdb:
   caddy_data:
   caddy_config:
+  app_fr:

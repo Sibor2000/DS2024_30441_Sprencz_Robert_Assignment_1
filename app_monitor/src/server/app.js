@@ -22,7 +22,7 @@ app.use(cors(),monitorRouter);
 amqpListen();
 connectWebsocket();
 
-const port = process.env.BACKEND_PORT;
+const port = process.env.MONITOR_PORT;
 app.listen(port, ()=>{
-    console.log(`Monitor server running on: ${process.env.BACKEND_PORT}`);
+    console.log(`Monitor server running on: ${process.env.MONITOR_PORT}`);
 })

@@ -49,14 +49,11 @@ router.get("/device/:id", /*verifyJWT,*/ async (req, res) => {
 
 //? Get measurements for a list of devices
 router.get("/devices", async (req, res) => {
-
-    /*
-    console.log(req.query)
-    res.sendStatus(200)
-    */
     const idList = req.query.ids
 
-    console.log(idList)
+    if(!idList){
+        return res.sendStatus(400)
+    }
 
     const placeholders = idList.map((_, index) => `$${index + 1}`).join(',');
     const query = {

@@ -20,7 +20,7 @@ app.use(cors(),deviceRouter);
 
 userDeleted();
 
-const port = process.env.BACKEND_PORT;
+const port = process.env.DEVICE_PORT;
 app.listen(port, ()=>{
-    console.log(`Device server running on: ${process.env.BACKEND_PORT}`);
+    console.log(`Device server running on: ${process.env.DEVICE_PORT}`);
 })

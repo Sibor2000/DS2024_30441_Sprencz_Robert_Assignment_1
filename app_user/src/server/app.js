@@ -14,12 +14,11 @@ await setUpDb();
 const app = express();
 
 const corsOptions = {
-    origin: 'http://app.localhost:5000',
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204
 };
-
 app.use(express.json());
 app.use(cors(corsOptions))
 app.use(userRouter);
@@ -31,7 +30,7 @@ app.use(cors(),userRouter);
 */
 checkForUser();
 
-const port = process.env.BACKEND_PORT;
+const port = process.env.USER_PORT;
 app.listen(port, ()=>{
-    console.log(`User server is running on: ${process.env.BACKEND_PORT}`);
+    console.log(`User server is running on: ${process.env.USER_PORT}`);
 })

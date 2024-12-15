@@ -33,7 +33,7 @@ export default {
             tableData: [],
             monitorLink: '/device',
             editLink: `/device`,
-            deleteLink: `http://${import.meta.env.VITE_DEVICE_HOST}:${import.meta.env.VITE_DEVICE_PORT}/device`
+            deleteLink: `${import.meta.env.VITE_DEVICE_URL}/device`
         }
     },
     created() {
