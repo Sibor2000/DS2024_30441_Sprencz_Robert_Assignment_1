@@ -7,6 +7,12 @@
             </button>
         </RouterLink>
 
+        <RouterLink to="/chat" v-slot="{ navigate }">
+            <button @click="navigate">
+                Chat
+            </button>
+        </RouterLink>
+
         <RouterLink to="/device/add" v-slot="{ navigate }">
             <button @click="navigate">
                 Add device

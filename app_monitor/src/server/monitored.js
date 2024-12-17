@@ -8,7 +8,7 @@ const router = express.Router()
 export default router
 
 //? Get measurements for a device
-router.get("/device/:id", /*verifyJWT,*/ async (req, res) => {
+router.get("/device/:id", verifyJWT, async (req, res) => {
 
     if (!validateUUID(req.params.id)) {
         return res.status(400).send({ message: "Invalid UUID" })
@@ -48,7 +48,7 @@ router.get("/device/:id", /*verifyJWT,*/ async (req, res) => {
 })
 
 //? Get measurements for a list of devices
-router.get("/devices", async (req, res) => {
+router.get("/devices", verifyJWT, async (req, res) => {
     const idList = req.query.ids
 
     if(!idList){

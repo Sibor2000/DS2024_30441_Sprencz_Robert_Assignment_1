@@ -5,7 +5,7 @@ import client from "../server/client.js"
 import crypto, { createHash } from "crypto"
 
 
-import { validatePassword } from "../util/regexes.js"
+import { validatePassword, validateUUID } from "../util/regexes.js"
 import { rolesPermissionFilter, permitAdminOrSelf, verifyJWT } from "../util/permission_middleware.js"
 import { RoleOptions } from "../util/role_options.js"
 
@@ -189,6 +189,32 @@ router.delete("/user/:id", verifyJWT, permitAdminOrSelf, async (req, res) => {
         res.send({ "message": "Deleted successfully" });
     } catch (err) {
         console.log(err);
+    }
+
+})
+
+router.get("/user/:id/checkAdmin", verifyJWT, async (req, res)=> {
+
+    if(!validateUUID(req.params.id)){
+        res.sendStatus(422)
+    }
+
+    const query = {
+        name: "get_user_amdin",
+        text: "select * from \"user\" where id=$1 and role='admin'",
+        values: [req.params.id]
+    }
+
+    try {
+        const result = await client.query(query);
+
+        if (result.rowCount == 0) {
+            res.send({value:false})
+        }else{
+            res.send({value:true})
+        }
+    } catch (error) {
+        console.log(error);
     }
 
 })

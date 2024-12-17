@@ -27,14 +27,15 @@
 
 <script>
 import { chat_instance } from '@/utilities/request';
+import { connectChatWebSocket, getWebSocket } from '@/utilities/websocket';
 
 export default {
     data() {
         return {
             messages: [],
             own_message: "",
-            typing:false,
-            typingTimeout:false,
+            typing: false,
+            typingTimeout: false,
             socket: null
         }
     },
@@ -71,8 +72,8 @@ export default {
             this.own_message = ""
         },
         socketSetup() {
-            this.socket = new WebSocket(`${import.meta.env.VITE_CHAT_WEBSOCKET_URL}?token=${this.$cookies.get("token")}`)
-
+            connectChatWebSocket(`${import.meta.env.VITE_CHAT_WEBSOCKET_URL}?token=${this.$cookies.get("token")}`)
+            this.socket = getWebSocket()
             this.socket.onmessage = async (event) => {
                 const incomingRaw = JSON.parse(event.data)
 
@@ -81,18 +82,15 @@ export default {
                     return
                 }
 
-                if(incomingRaw.type == "seenNotification") {
+                if (incomingRaw.type == "seenNotification") {
                     this.handleIncomingSeenNotice(incomingRaw)
                     return
                 }
 
-                if(incomingRaw.type == "typingNoticeB2F") {
+                if (incomingRaw.type == "typingNoticeB2F") {
                     this.handleIncomingTypingNotice()
+                    return
                 }
-            }
-
-            this.socket.onclose = () => {
-                console.log("Connection closed")
             }
         },
         async handleIncomingChatMessage(incomingRaw) {
@@ -114,40 +112,40 @@ export default {
                 }
             })
         },
-        async handleIncomingSeenNotice(incomingRaw){
+        async handleIncomingSeenNotice(incomingRaw) {
             const incoming = incomingRaw.data
 
             if (incoming.conversationId != this.$route.params.id) {
                 return
             }
 
-            this.messages = this.messages.map(e=>{
-                e.seen=true
+            this.messages = this.messages.map(e => {
+                e.seen = true
                 return e
             })
         },
-        async handleIncomingTypingNotice(){
-            this.typing=true
+        async handleIncomingTypingNotice() {
+            this.typing = true
 
-            if(this.typingTimeout){
+            if (this.typingTimeout) {
                 clearTimeout(this.typingTimeout)
             }
 
-            this.typingTimeout = setTimeout(()=>{
+            this.typingTimeout = setTimeout(() => {
                 this.typing = false
             }, 2000)
 
         },
-        sendTypingNotice(){
-            if(this.socket==""){
+        sendTypingNotice() {
+            if (this.socket == "") {
                 console.log("Socket has not been setup yet")
                 return
             }
 
             this.socket.send(JSON.stringify({
-                type:"typingNoticeF2B",
-                data:{
-                    conversationId:this.$route.params.id
+                type: "typingNoticeF2B",
+                data: {
+                    conversationId: this.$route.params.id
                 }
             }))
         }

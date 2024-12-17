@@ -178,5 +178,3 @@ export async function deviceEditMonitor(message) {
         })
     })
 }
-
-//TODO: merge device add and delete

@@ -5,10 +5,18 @@ import { jwtVerify } from "jose";
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const permitAdminOrSelf = (req, res, next) => {
-    if (req.user && (req.user.role === "admin" || req.user.id == req.params.id)) {
+    if (req.user && (req.user.role == "admin" || req.user.id == req.params.id)) {
         next();
     } else {
-        res.send(403).send({ "message": "Permission denied" })
+        res.status(403).send({ "message": "Permission denied" })
+    }
+}
+
+export const permitAdminOrOwnDevice = (req, res, next) => {
+    if (req.user && (req.user.role == "admin" || req.user.id == req.body.owner_id)) {
+        next();
+    } else {
+        res.status(403).send({ "message": "Permission denied" })
     }
 }
 

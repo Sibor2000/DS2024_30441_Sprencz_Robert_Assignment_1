@@ -5,6 +5,7 @@ import client from "./client.js"
 
 let wss
 const userConections = new Map()
+const userRoles = new Map()
 
 export async function connectWebsocket() {
     dotenv.config()
@@ -20,20 +21,24 @@ export async function connectWebsocket() {
             user_id = payload.id
 
             userConections.set(user_id, ws)
+            userRoles.set(user_id, payload.role)
         } catch (error) {
             console.log(error)
         }
 
+        console.log(`Websocket ${user_id} has connected`)
         ws.onmessage = (mes) => {
             const received = JSON.parse(mes.data)
 
-            if(received.type=="typingNoticeF2B"){
+            if (received.type == "typingNoticeF2B") {
                 conversationTypingNotify(received.data.conversationId, user_id)
             }
         }
 
         ws.onclose = () => {
             userConections.delete(user_id)
+            userRoles.delete(user_id)
+            console.log(`Websocket ${user_id} has disconnected`)
         }
     })
 }
@@ -71,9 +76,8 @@ export async function sendChatMessage(messageId, sender, content, conversationId
     }
 }
 
+//? Notify members of conversation that it has been seen
 export async function conversationSeenNotify(conversationId, readerId) {
-    //get all users who are part of that conversation
-    //send them a notification that conversationId has been seen
     const recipient_query = {
         name: "get_recipients_seen",
         text: 'select member_id from "conversation_membership" where conversation_id=$1 and member_id<>$2;',
@@ -101,7 +105,7 @@ export async function conversationSeenNotify(conversationId, readerId) {
     }
 }
 
-async function conversationTypingNotify(conversationId, typerId){
+async function conversationTypingNotify(conversationId, typerId) {
     const recipient_query = {
         name: "get_recipients_typing",
         text: 'select member_id from "conversation_membership" where conversation_id=$1 and member_id<>$2;',
@@ -125,4 +129,82 @@ async function conversationTypingNotify(conversationId, typerId){
         console.log(error)
         return
     }
+}
+
+export async function newConversationNotify(senderId, conversationId) {
+    const recipient_query = {
+        name: "get_recipients_new_convo",
+        text: 'select member_id from "conversation_membership" where conversation_id=$1 and member_id<>$2;',
+        values: [conversationId, senderId],
+    }
+
+    try {
+        const res = await client.query(recipient_query)
+        const receivers = res.rows
+
+        receivers.forEach(async (rec) => {
+            const wsy = userConections.get(rec.member_id)
+
+            if (wsy) {
+                wsy.send(JSON.stringify({
+                    type: "newConversation",
+                    data: {
+                        conversationId: conversationId
+                    }
+                }))
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export async function userNotification(senderId, message) {
+
+    userConections.forEach((value, key, map) => {
+        try {
+            if (key == senderId || userRoles.get(key)=="admin") {
+                return
+            }
+
+            const wsy = value
+
+            wsy.send(JSON.stringify({
+                type: "userNotification",
+                data: {
+                    message: message
+                }
+            }))
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
+    /*
+    const recipient_query = {
+        name: "get_users",
+        text: 'select id from "member" where id<>$1;',
+        values: [senderId],
+    }
+
+    try {
+        const res = await client.query(recipient_query)
+        const receivers = res.rows
+
+        receivers.forEach(async (rec) => {
+            const wsy = userConections.get(rec.id)
+
+            if (wsy) {
+                wsy.send(JSON.stringify({
+                    type: "userNotification",
+                    data:{
+                        message:message
+                    }
+                }))
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+    */
 }

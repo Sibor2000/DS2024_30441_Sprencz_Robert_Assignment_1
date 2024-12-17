@@ -4,14 +4,17 @@ import crypto from "crypto"
 import { verifyJWT } from "../util/permission_middleware.js"
 import { validateUUID } from "../util/regexes.js"
 import { text } from "stream/consumers"
-import { conversationSeenNotify, sendChatMessage } from "./websocket.js"
+import { conversationSeenNotify, newConversationNotify, sendChatMessage, userNotification } from "./websocket.js"
+import "dotenv/config"
 
 const router = express.Router()
 export default router
 
 //? Get all conversations
-router.get("/conversations", async (req,res)=>{
-    const query = 'select * from "conversation"'
+router.get("/conversations", verifyJWT, async (req,res)=>{
+    const query = req.user.role == "admin" ?
+    'select * from "conversation"' :
+    `select c.* from "conversation" c join "conversation_membership" cm on c.id = cm.conversation_id where cm.member_id='${req.user.id}'`
 
     try {
         const result = await client.query(query)
@@ -33,7 +36,35 @@ router.post("/conversation", verifyJWT, async (req,res)=>{
         return res.status(422).send({message:"Incorrect uuids"})
     }
 
-    //TODO: check if role is user, only start convo with admins
+    if(req.user.role != "admin"){
+        const options = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${req.token}`
+            }
+        };
+        const userUrl = process.env.USER_SERVICE_URL+`/user/${req.body.user_id}/checkAdmin`
+
+        console.log(userUrl)
+
+        try {
+            const admin_check = await fetch(userUrl, options)
+            const data = await admin_check.json()
+
+            console.log(data)
+
+            if(data.value == false){
+                res.status(403).send({message:"User can only chat with user"})
+                return
+            }
+
+        } catch (error) {
+            console.log(error)
+            res.sendStatus(403)
+            return
+        }
+    }
 
     //create conversation
 
@@ -120,6 +151,7 @@ router.post("/conversation", verifyJWT, async (req,res)=>{
         return
     }
 
+    newConversationNotify(req.user.id, conv_id)
 
     res.send({id:conv_id})
 
@@ -178,7 +210,7 @@ router.get("/conversation/:id/messages", verifyJWT, async (req,res)=>{
 router.put("/conversation/:id/messages/read", verifyJWT, async (req,res)=>{
     const read_query = {
         name:"read_conv_route",
-        text:'update "message" set seen=true where sender<>$1 and conversation_id=$2',
+        text:'update "message" set seen=true where sender<>$1 and conversation_id=$2 and exists (select 1 from "conversation_membership" where member_id=$1 and conversation_id=$2)',
         values:[req.user.id,req.params.id]
     }
 
@@ -242,4 +274,13 @@ router.post("/message", verifyJWT, async (req, res)=>{
     sendChatMessage(message_id, req.user.id, req.body.message, req.body.conversation_id)
 
     res.sendStatus(200)
+})
+
+//? Send an announcement towards connected users
+router.post("/user_announcement", verifyJWT, async (req,res) => {
+    if(req.user.role != "admin"){
+        res.sendStatus(403)
+    }
+    userNotification(req.user.id, req.body.message)
+    res.sendStatus(200);
 })

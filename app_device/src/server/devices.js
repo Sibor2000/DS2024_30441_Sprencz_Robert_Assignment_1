@@ -3,14 +3,12 @@ import client from "./client.js"
 import crypto from "crypto"
 
 import { validatePassword, validateUUID } from "../util/regexes.js"
-import { permitAdminOrSelf, verifyJWT } from "../util/permission_middleware.js"
+import { permitAdminOrOwnDevice, permitAdminOrSelf, verifyJWT } from "../util/permission_middleware.js"
 import { RoleOptions } from "../util/role_options.js"
 import { checkForUser, deviceAddMonitor, deviceDeleteMonitor , deviceEditMonitor } from "./queue.js"
 
 const router = express.Router()
 export default router
-
-// TODO: might want to check what permissions does a user have (edit, add)
 
 //? Get all devices
 //If not an admin, only see own devices
@@ -61,7 +59,7 @@ router.get("/device/:id", verifyJWT, async (req, res) => {
 })
 
 //? Add device with user check
-router.post("/device", verifyJWT, checkForUser, async (req, res) => {
+router.post("/device", verifyJWT, permitAdminOrOwnDevice, checkForUser, async (req, res) => {
     try {
         let genUUID = crypto.randomUUID();
 
@@ -70,7 +68,6 @@ router.post("/device", verifyJWT, checkForUser, async (req, res) => {
             id: genUUID
         }
 
-        //TODO: change the query req.body -> deviceData
         const query = {
             name: "add_device",
             text: "insert into \"device\" (id, description, address, max_nrg_con_per_hour, owner_id) values ($1,$2,$3,$4,$5);",
@@ -94,7 +91,7 @@ router.post("/device", verifyJWT, checkForUser, async (req, res) => {
 })
 
 //? Update device
-router.put("/device/:id", verifyJWT, async (req, res) => {
+router.put("/device/:id", verifyJWT, permitAdminOrOwnDevice, async (req, res) => {
     try {
         if (!validateUUID(req.body.owner_id)) {
             res.status(400).send({ "message": "Invalid owner id" })
@@ -134,10 +131,14 @@ router.put("/device/:id", verifyJWT, async (req, res) => {
 
 //? Delete device
 router.delete("/device/:id", verifyJWT, async (req, res) => {
-    const query = {
-        name: "delete_device",
+    const query = req.user.role == "admin" ? {
+        name: "delete_device_admin",
         text: "delete from \"device\" where id=$1",
         values: [req.params.id]
+    }: {
+        name: "delete_device_user",
+        text: "delete from \"device\" where id=$1 and owner_id=$2",
+        values: [req.params.id, req.user.id]
     }
 
     try {

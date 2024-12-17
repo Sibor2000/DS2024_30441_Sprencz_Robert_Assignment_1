@@ -85,7 +85,6 @@ const router = createRouter({
    {
     path:'/chat',
     name:'chat_hub',
-    meta: { noAuth: true },
     component:ChatView
    },
    {

@@ -131,6 +131,7 @@ services:
   app_chat:
     depends_on:
       - chat_db
+      - app_user
     build: ./app_chat
     env_file:
       - ./.env
@@ -146,6 +147,7 @@ services:
       - JWT_SECRET=$JWT_SECRET
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
+      - USER_SERVICE_URL=$VITE_CHAT_URL
 
   app_frontend:
     depends_on:

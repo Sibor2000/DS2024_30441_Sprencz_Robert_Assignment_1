@@ -52,6 +52,7 @@ export const verifyJWT = async(req,res,next) => {
     try{
         const {payload} = await jwtVerify(token, mySecret)
         req.user = payload
+        req.token = token
         next()
     }catch(error){
         return res.status(401).send({"message":"invalid token"})

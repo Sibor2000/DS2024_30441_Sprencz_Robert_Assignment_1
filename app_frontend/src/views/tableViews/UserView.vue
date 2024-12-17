@@ -13,6 +13,12 @@
             </button>
         </RouterLink>
 
+        <RouterLink to="/chat" v-slot="{ navigate }">
+            <button @click="navigate">
+                Chat
+            </button>
+        </RouterLink>
+
         <RouterLink to="/user/add" v-slot="{ navigate }">
             <button @click="navigate">
                 Add user

@@ -6,11 +6,10 @@ import chatRouter from "./routes.js"
 
 import cors from "cors"
 import { connectWebsocket } from "./websocket.js"
-//import { userDeleted } from "./queue.js"
-//import setUpDb from "../util/db_table_setup.js"
+import setUpDb from "../util/db_table_setup.js"
 
-//setUpDb();
-await client.connect();
+setUpDb();
+//await client.connect();
 
 const app = express();
 
