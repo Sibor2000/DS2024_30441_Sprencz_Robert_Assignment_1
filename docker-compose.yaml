@@ -147,7 +147,7 @@ services:
       - JWT_SECRET=$JWT_SECRET
       - JWT_ENC_ALGO=$JWT_ENC_ALGO
       - JWT_EXPIRY=$JWT_EXPIRY
-      - USER_SERVICE_URL=$VITE_CHAT_URL
+      - USER_SERVICE_URL=$VITE_USER_URL
 
   app_frontend:
     depends_on:

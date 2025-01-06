@@ -35,7 +35,7 @@ router.post("/conversation", verifyJWT, async (req,res)=>{
     if(!validateUUID(req.user.id) || !validateUUID(req.body.user_id)){
         return res.status(422).send({message:"Incorrect uuids"})
     }
-
+/*
     if(req.user.role != "admin"){
         const options = {
             method: 'GET',
@@ -65,7 +65,7 @@ router.post("/conversation", verifyJWT, async (req,res)=>{
             return
         }
     }
-
+*/
     //create conversation
 
     let conv_id = crypto.randomUUID()
